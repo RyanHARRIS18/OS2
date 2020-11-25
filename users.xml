@@ -1,0 +1,80 @@
+<root>
+	<user>
+		<account>Chico</account>
+		<firstname>Leonard</firstname>
+		<lastname>Marx</lastname>
+		<description>Pianist</description>
+		<password>Password1</password>
+		<manager></manager>
+		<ou>comedians</ou>
+		<memberOf>
+			<group>Marx Brothers</group>
+			<group>GGMusicians</group>
+		</memberOf>
+	</user>
+	<user>
+		<account>Harpo</account>
+		<firstname>Arthur</firstname>
+		<lastname>Marx</lastname>
+		<description>Original firstname was Adolph</description>
+		<password>Password2</password>
+		<manager>Chico</manager>
+		<ou>comedians</ou>
+		<memberOf>
+			<group>Marx Brothers</group>
+			<group>Domain Admins</group>
+		</memberOf>
+	</user>
+	<user>
+		<account>Groucho</account>
+		<firstname>Julius Heney</firstname>
+		<lastname>Marx</lastname>
+		<description>Played guitar and sang</description>
+		<password>Password3</password>
+		<manager>Chico</manager>
+		<ou>comedians</ou>
+		<memberOf>
+			<group>Marx Brothers</group>
+			<group>GGMusicians</group>
+		</memberOf>
+
+	</user>
+	<user>
+		<account>Gummo</account>
+		<firstname>Milton</firstname>
+		<lastname>Marx</lastname>
+		<description>Left the troop to serve in WWII</description>
+		<password>Password4</password>
+		<manager>Chico</manager>
+		<ou>comedians</ou>
+		<memberOf>
+			<group>Marx Brothers</group>
+		</memberOf>
+
+	</user>
+	<user>
+		<account>Zeppo</account>
+		<firstname>Herbert</firstname>
+		<lastname>Marx</lastname>
+		<description>Vocalist</description>
+		<password>Password5</password>
+		<manager>Chico</manager>
+		<ou>comedians</ou>
+		<memberOf>
+			<group>Marx Brothers</group>
+		</memberOf>
+
+	</user>
+	<user>
+		<account>Manfred</account>
+		<firstname>Manfred</firstname>
+		<lastname>Marx</lastname>
+		<description>Died as an infant</description>
+		<password>Password6</password>
+		<manager>Chico</manager>
+		<ou>comedians</ou>
+		<memberOf>
+			<group>Marx Brothers</group>
+		</memberOf>
+	</user>
+</root>
