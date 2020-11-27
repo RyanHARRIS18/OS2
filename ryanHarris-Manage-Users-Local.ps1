@@ -46,7 +46,8 @@
     foreach($user in $Users){
         #checks to see if we must make user
             try{
-            Get-AdUser -FIlter "Name -eq $($user.account)" -SearchBase "OU=$ouList,$domain";
+            $userFound = Get-ADUser -Filter * -SearchBase "OU=$ouList, $domain"| Select-Object $($user.account)
+             write-host "User $($user.account) found in $ouList"
             }
             catch {
             #property of an object in the expanision string it needs alittle help
@@ -56,15 +57,16 @@
 
             #checks to see if we need to add use to group
              foreach($group in $user.memberof.group){
+                $group = $group.Replace(" ","");
                 try{
-                     $groupMembers = Get-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" | Select -ExcludeProperty SamAccountName
-                     If ( $groupMembers -contains $user.account){
-                     Write-Host "$user.account is a member of $group";
-                     }                }
+                     $groupMembers = Get-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" | Select-Object $($user.account)
+                     Write-Host "$($user.account) is a member of $group";
+                                  
+                    }
                 catch{
                    #Add user to groups they belong to
                     write-host "adding user $($user.account) to group $group";
-                    Add-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" -Members $user.account;
+                    Add-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" -Members $($user.account);
                 }
             }
     }
