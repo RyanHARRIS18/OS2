@@ -18,12 +18,12 @@
      $ouList = $xml.root.user.ou | Sort-Object | Get-Unique;
      foreach($ou in $ouList){
          try{
-         $ouExisted = Get-ADOrganizationalUnit -Identity "Ou=$ou, $domain";
-         write-host("The organization ($ou) exists on the computer"); 
-         }
-         catch{
          New-ADOrganizationalUnit -Name $ou -Path "$domain";
          write-host("Creating $ou organizational Unit");
+         }
+         catch{
+         $ouExisted = Get-ADOrganizationalUnit -Identity "Ou=$ou, $domain";
+         write-host("The organization ($ou) exists on the computer"); 
          }
      } 
 
@@ -32,12 +32,13 @@
        foreach($group in $groups){
        $group = $group.Replace(" ","");
          try{
-         $groupExisted = Get-ADGroup -Identity "CN=$group, OU=$ouList, $domain";
-         write-host("The Group ($group) exists on the Domain in the Organizational Unit ($ouList)"); 
-         }
-         catch{
          New-ADGroup $group -GroupScope Global -Path "OU=$ouList, $domain";
          write-host("Creating $group organizational Unit");
+          }
+         catch{
+         $groupExisted = Get-ADGroup -Identity "CN=$group, OU=$ouList, $domain";
+         write-host("The Group ($group) exists on the Domain in the Organizational Unit ($ouList)"); 
+       
          }
      } 
   
@@ -46,27 +47,26 @@
     foreach($user in $Users){
         #checks to see if we must make user
             try{
-            $userFound = Get-ADUser -Filter * -SearchBase "OU=$ouList, $domain"| Select-Object $($user.account)
-             write-host "User $($user.account) found in $ouList"
-            }
+            New-ADUser -Name $($user.account) -GivenName "$($user.firstname)" -Surname "$($user.lastname)"  -Path "OU=$ouList,$domain" -AccountPassword (ConvertTo-SecureString -AsPlainText $user.password -force) -Enabled $true;
+            write-host "creating user $($user.account)";          
+           }
             catch {
             #property of an object in the expanision string it needs alittle help
-            write-host "creating user $($user.account)"
-            New-ADUser -Name $($user.account) -GivenName "$($user.firstname)" -Surname "$($user.lastname)"  -Path "OU=$ouList,$domain" -AccountPassword (ConvertTo-SecureString -AsPlainText $user.password -force) -Enabled $true;
+            $userFound = Get-ADUser -Filter * -SearchBase "OU=$ouList, $domain"| Select-Object $($user.account)
+            write-host "User $($user.account) found in $ouList"
             }
 
             #checks to see if we need to add use to group
              foreach($group in $user.memberof.group){
                 $group = $group.Replace(" ","");
                 try{
-                     $groupMembers = Get-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" | Select-Object $($user.account)
-                     Write-Host "$($user.account) is a member of $group";
-                                  
-                    }
-                catch{
-                   #Add user to groups they belong to
-                    write-host "adding user $($user.account) to group $group";
+                    #Add user to groups they belong to
                     Add-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" -Members $($user.account);
+                    write-host "adding user $($user.account) to group ($group)";                  
+                   }
+                catch{
+                  $groupMembers = Get-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" | Select-Object $($user.account)
+                  Write-Host "$($user.account) is a member of $group";
                 }
             }
     }
