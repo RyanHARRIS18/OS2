@@ -110,3 +110,4 @@ if ($Filename -eq ''){
     if($id -eq $null){$id=get-md5}
     Create-UsersXML -ID $ID|Out-File -FilePath $Filename
     write-host "File $Filename created"
+    }
