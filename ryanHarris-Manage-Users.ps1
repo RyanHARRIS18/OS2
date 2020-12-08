@@ -4,11 +4,6 @@
       HelpMessage = 'Enter a filepath'
       )][String]$filepath
   )
-
-  #Great Check line 
-  # Get-ADUser -SearchBase "OU=HarrisR,DC=esage,DC=us" -Filter * | ft
-  # Get-ADOrganizationalUnit -Filter 'Name -like "*"' | ft 
-
     #Domain to use
     $domain = (get-AdDomain).distinguishedName;
     #XML to Use
@@ -37,7 +32,6 @@
          catch{
          $groupExisted = Get-ADGroup -Identity "$group";
          write-host("The Group ($group) exists on the Domain in the Organizational Unit $($user.ou)"); 
-       
          }
      } 
 
