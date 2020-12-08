@@ -36,7 +36,7 @@
          write-host("Creating $group organizational Unit");
           }
          catch{
-         $groupExisted = Get-ADGroup -Identity "CN=$group, OU=$ouList, $domain";
+         $groupExisted = Get-ADGroup -Identity "$group";
          write-host("The Group ($group) exists on the Domain in the Organizational Unit ($ouList)"); 
        
          }
@@ -65,7 +65,7 @@
                     write-host "adding user $($user.account) to group ($group)";                  
                    }
                 catch{
-                  $groupMembers = Get-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" | Select-Object $($user.account)
+                  $groupMembers = Get-ADGroupMember -Identity "$group" | Select-Object $($user.account)
                   Write-Host "$($user.account) is a member of $group";
                 }
             }
