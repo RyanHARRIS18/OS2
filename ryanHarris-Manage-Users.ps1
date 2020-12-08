@@ -1,50 +1,72 @@
-    <#
-.SYNOPSIS
-    Automation of creating Oraganizational Units, groups, and Users for a domain
-    froma xml file.
-.DESCRIPTION
-    .
-.PARAMETER Path
-    The path to the .
-.PARAMETER LiteralPath
-    Specifies a path to one or more locations. Unlike Path, the value of 
-    LiteralPath is used exactly as it is typed. No characters are interpreted 
-    as wildcards. If the path includes escape characters, enclose it in single
-    quotation marks. Single quotation marks tell Windows PowerShell not to 
-    interpret any characters as escape sequences.
-.EXAMPLE
-    C:\PS> 
-    <Description of example>
-.NOTES
-    Author: Ryan Harris
-    Date:   November 2020   
-#>
+﻿  Param (
+      [parameter(
+      Mandatory = $true,
+      HelpMessage = 'Enter a filepath'
+      )][String]$filepath
+  )
+
+  #Great Check line 
+  # Get-ADUser -SearchBase "OU=HarrisR,DC=esage,DC=us" -Filter * | ft
+  # Get-ADOrganizationalUnit -Filter 'Name -like "*"' | ft 
+
+    #Domain to use
+    $domain = (get-AdDomain).distinguishedName;
     
-    param(
-        [Parameter(Mandatory=$true)]$filepath
-    )
+    $xml =[xml](get-content $filepath)
 
-    $x =[xml](get-content C:\filepath)
-    $x.root
+    #Check if we need to create OU(s)
+     $ouList = $xml.root.user.ou | Sort-Object | Get-Unique;
+     foreach($ou in $ouList){
+         try{
+         New-ADOrganizationalUnit -Name $ou -Path "$domain";
+         write-host("Creating $ou organizational Unit");
+         }
+         catch{
+         $ouExisted = Get-ADOrganizationalUnit -Identity "Ou=$ou, $domain";
+         write-host("The organization ($ou) exists on the computer"); 
+         }
+     } 
 
-    $Users =$x.root.user
+    #Get Necessary Groups to Create
+    $groups = $xml.root.user.memberOf.group | Sort-Object | Get-Unique;
+       foreach($group in $groups){
+       $group = $group.Replace(" ","");
+         try{
+         New-ADGroup $group -GroupScope Global -Path "OU=$ouList, $domain";
+         write-host("Creating $group organizational Unit");
+          }
+         catch{
+         $groupExisted = Get-ADGroup -Identity "CN=$group, OU=$ouList, $domain";
+         write-host("The Group ($group) exists on the Domain in the Organizational Unit ($ouList)"); 
+       
+         }
+     } 
+  
+   #Make Necessary Users to Create
+    $Users =$xml.root.user
     foreach($user in $Users){
-    #property of an object in the expanision string it needs alittle help
-    write-host "creating user $($user.account)"
+        #checks to see if we must make user
+            try{
+            New-ADUser -Name $($user.account) -GivenName "$($user.firstname)" -Surname "$($user.lastname)"  -Path "OU=$ouList,$domain" -AccountPassword (ConvertTo-SecureString -AsPlainText $user.password -force) -Enabled $true;
+            write-host "creating user $($user.account)";          
+           }
+            catch {
+            #property of an object in the expanision string it needs alittle help
+            $userFound = Get-ADUser -Filter * -SearchBase "OU=$ouList, $domain"| Select-Object $($user.account)
+            write-host "User $($user.account) found in $ouList"
+            }
 
-    foreach($group in $user.memberof.group){
-    write-host "adding user $($user.account) to group $group"
+            #checks to see if we need to add use to group
+             foreach($group in $user.memberof.group){
+                $group = $group.Replace(" ","");
+                try{
+                    #Add user to groups they belong to
+                    Add-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" -Members $($user.account);
+                    write-host "adding user $($user.account) to group ($group)";                  
+                   }
+                catch{
+                  $groupMembers = Get-ADGroupMember -Identity "CN=$group, OU=$ouList, $domain" | Select-Object $($user.account)
+                  Write-Host "$($user.account) is a member of $group";
+                }
+            }
     }
-
-    }
-
-    #distinguished names
-    Looks like a filepath
-    (get-aduser cjlindstrom)
-
-    #get domain name
-    Get-ADDomain
-
-   #If we wanted the new var to contain the newly created bojecty you acan use the _PassThru Param
-
-    $new = New-ADUser "Anita" -passthru;
