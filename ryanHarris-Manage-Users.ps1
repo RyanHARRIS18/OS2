@@ -30,7 +30,7 @@
     #Get Necessary Groups to Create
     $groups = $xml.root.user.memberOf.group | Sort-Object | Get-Unique;
        foreach($group in $groups){
-       $group = $group.Replace(" ","");
+       #$group = $group.Replace(" ","");
          try{
          New-ADGroup $group -GroupScope Global -Path "OU=$ouList, $domain";
          write-host("Creating $group organizational Unit");
